@@ -6,10 +6,9 @@ from api.v1.views import app_views
 from os import getenv
 
 app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.register_blueprint(app_views)
-
-
-"""app.url_map.strict_slashes = False"""
+cors = CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
 
 
 @app.teardown_appcontext
@@ -23,6 +22,13 @@ def page_not_found(e):
     """ a handler for 404 errors that returns a
     JSON-formatted 404 status code response"""
     return jsonify({"error": "Not found"}), 404
+
+app.config['SWAGGER'] = {
+    'title': 'AirBnB clone Restful API',
+    'uiversion': 3
+}
+
+Swagger(app)
 
 
 if __name__ == "__main__":

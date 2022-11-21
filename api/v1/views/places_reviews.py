@@ -7,49 +7,49 @@ from flask import jsonify, abort, request
 from models.place import Place
 from models.city import City
 from models import storage
-from models.user import User
+from models.review import Review
 
 
-@app_views.route('/cities/<city_id>/places',
+@app_views.route('/places/<place_id>/reviews',
                  methods=['GET'], strict_slashes=False)
-def place(city_id):
-    """retrieves the list of places objects of a city"""
-    city = storage.get(City, city_id)
-    if not city:
+def review(place_id):
+    """retrieves the list of reviews object of a place"""
+    place = storage.get(Place, city_id)
+    if not place:
         abort(404)
     plas = []
-    for place in city.places:
-        plas.append(place.to_dict())
+    for review in place.reviews:
+        plas.append(review.to_dict())
     return jsonify(plas)
 
 
-@app_views.route('/places/<place_id>', methods=['GET'], strict_slashes=False)
-def get_place(place_id):
-    """retrieves a place object"""
-    place = storage.get(Place, place_id)
-    if not place:
+@app_views.route('/reviews/<review_id>', methods=['GET'], strict_slashes=False)
+def get_review(review_id):
+    """retrieves a review object"""
+    review = storage.get(Review, review_id)
+    if not review:
         abort(404)
-    return jsonify(place.to_dict())
+    return jsonify(review.to_dict())
 
 
-@app_views.route('/place/<place_id>', methods=['DELETE'], strict_slashes=False)
-def del_place(place_id):
-    """deletes an instance of plate"""
-    place = storage.get(Place, place_id)
-    if not place:
+@app_views.route('/reviews/<review_id>', methods=['DELETE'], strict_slashes=False)
+def del_review(review_id):
+    """deletes an instance of review"""
+    review = storage.get(Review, review_id)
+    if not review:
         abort(404)
-    storage.delete(place)
+    storage.delete(review)
     storage.save()
 
     return jsonify({}), 200
 
 
-@app_views.route('/cities/<city_id>/places',
+@app_views.route('/places/<place_id>/reviews',
                  methods=['POST'], strict_slashes=False)
-def post_place(city_id):
-    """creates a place"""
-    city = storage.get(City, city_id)
-    if not city:
+def post_review(place_id):
+    """creates a review"""
+    place = storage.get(Place, place_id)
+    if not place:
         abort(404)
     data = request.get_json()
     if not data:
@@ -60,27 +60,27 @@ def post_place(city_id):
     user_id = data['user_id']
     if not storage.get(User, user_id):
         abort(404)
-    if 'name' not in data:
-        abort(400, "Missing name")
+    if 'text' not in data:
+        abort(400, "Missing text")
 
-    data['city_id'] = city_id
-    place = Place(**data)
-    place.save()
+    data['place_id'] = place_id
+    review = Review(**data)
+    review.save()
 
-    return jsonify(place.to_dict()), 201
+    return jsonify(review.to_dict()), 201
 
 
-@app_views.route('/places/<place_id>', methods=['PUT'], strict_slashes=False)
-def put_place(place_id):
-    """update the place object"""
-    place = storage.get(Place, place_id)
-    if not place:
+@app_views.route('/reviews/<review_id>', methods=['PUT'], strict_slashes=False)
+def put_review(review_id):
+    """update the review object"""
+    review = storage.get(Review, review_id)
+    if not review:
         abort(404)
     data = request.get_json()
     if not data:
         abort(400, "Not a JSON")
-    for key, values in data.items():
-        if key not in ['id', 'user_id', 'city_id', "created_at", 'updated_at']:
-            setattr(place, key, values)
-    place.save()
-    return jsonify(place.to_dict()), 200
+    for key, value in data.items():
+        if key not in ['id', 'user_id', 'place_id', 'created_at', 'updated_at']:
+            setattr(review, key, value)
+    storage.save()
+    return jsonify(review.to_dict()), 200

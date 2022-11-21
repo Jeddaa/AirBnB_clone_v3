@@ -3,9 +3,9 @@
 RESTFul API actions"""
 
 from api.v1.views import app_views
-from flask import jsonify, abort, request
+from flask import jsonify, abort, request, make_response
 from models.place import Place
-from models.city import City
+from models.user import User
 from models import storage
 from models.review import Review
 
@@ -17,10 +17,8 @@ def review(place_id):
     place = storage.get(Place, place_id)
     if not place:
         abort(404)
-    plas = []
-    for review in place.reviews:
-        plas.append(review.to_dict())
-    return jsonify(plas)
+    reviews = [review.to_dict() for review in place.reviews)
+    return jsonify(reviews)
 
 
 @app_views.route('/reviews/<review_id>', methods=['GET'], strict_slashes=False)
@@ -42,7 +40,7 @@ def del_review(review_id):
     storage.delete(review)
     storage.save()
 
-    return jsonify({}), 200
+    return make_response(jsonify({}), 200)
 
 
 @app_views.route('/places/<place_id>/reviews',
@@ -54,22 +52,22 @@ def post_review(place_id):
         abort(404)
     data = request.get_json()
     if not data:
-        abort(400, "Not a JSON")
+        abort(400, description="Not a JSON")
     if 'user_id' not in data:
-        abort(400, "Missing user_id")
+        abort(400, decription="Missing user_id")
 
     user_id = data['user_id']
     if not storage.get(User, user_id):
         abort(404)
     if 'text' not in data:
-        abort(400, "Missing text")
+        abort(400, description="Missing text")
 
     data['place_id'] = place_id
     review = Review(**data)
     storage.new(review)
     storage.save()
 
-    return jsonify(review.to_dict()), 201
+    return make_response(jsonify(review.to_dict()), 201)
 
 
 @app_views.route('/reviews/<review_id>', methods=['PUT'], strict_slashes=False)
@@ -80,10 +78,10 @@ def put_review(review_id):
         abort(404)
     data = request.get_json()
     if not data:
-        abort(400, "Not a JSON")
+        abort(400, description="Not a JSON")
     for key, value in data.items():
         if key not in ['id', 'user_id', 'place_id',
                        'created_at', 'updated_at']:
             setattr(review, key, value)
     storage.save()
-    return jsonify(review.to_dict()), 200
+    return make_response(jsonify(review.to_dict()), 200)

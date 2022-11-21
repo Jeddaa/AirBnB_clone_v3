@@ -10,7 +10,8 @@ from models import storage
 from models.user import User
 
 
-@app_views.route('/cities/<city_id>/places', methods=['GET'], strict_slashes=False)
+@app_views.route('/cities/<city_id>/places',
+                 methods=['GET'], strict_slashes=False)
 def get_city(city_id):
     """retrieves the list of places objects of a city"""
     city = storage.get(City, city_id)
@@ -43,7 +44,8 @@ def del_place(place_id):
     return jsonify({}), 200
 
 
-@app_views.route('/cities/<city_id>/places', methods=['POST'], strict_slashes=False)
+@app_views.route('/cities/<city_id>/places',
+                 methods=['POST'], strict_slashes=False)
 def post_place(city_id):
     """creates a place"""
     city = storage.get(City, city_id)
@@ -53,13 +55,13 @@ def post_place(city_id):
     if not data:
         abort(400, "Not a JSON")
     if 'user_id' not in data:
-        abort(400, 'Missing user_id')
+        abort(400, "Missing user_id")
 
     user_id = data['user_id']
     if not storage.get(User, user_id):
         abort(404)
     if 'name' not in data:
-        abort(400, 'Missing name')
+        abort(400, "Missing name")
 
     data['city_id'] = city_id
     place = Place(**data)

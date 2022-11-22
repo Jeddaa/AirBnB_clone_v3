@@ -36,7 +36,7 @@ class User(BaseModel, Base):
     @password.setter
     def password(self, pwd):
         """hashing password values"""
-        self._password = hashlib.md5(pwd.encode()).hexdigest()
+        self._password = md5(pwd.encode()).hexdigest()
 """
     def __setattr__(self, name, value):
         ""sets a password with md5 encryption""

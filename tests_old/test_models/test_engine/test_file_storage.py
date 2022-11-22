@@ -115,27 +115,27 @@ class TestFileStorage(unittest.TestCase):
         self.assertEqual(json.loads(string), json.loads(js))
 
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
-    def test_count(self):
-        """Test that count method returns accurate count of objects"""
+    def test_get(self):
+        """ Tests method for obtaining an instance file storage"""
         storage = FileStorage()
-        # clear objects from storage
-        FileStorage._FileStorage__objects.clear()
+        dic = {"name": "Vecindad"}
+        instance = State(**dic)
+        storage.new(instance)
         storage.save()
-        # create new object of each class
-        for key, value in classes.items():
-            instance = value()
-            instance_key = instance.__class__.__name__ + "." + instance.id
-            FileStorage._FileStorage__objects[instance_key] = instance
-        storage.save()
-        self.assertEqual(storage.count(), 7)
+        storage = FileStorage()
+        get_instance = storage.get(State, instance.id)
+        self.assertEqual(get_instance, instance)
 
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
-    def test_get(self):
-        """Test that count method returns object by valid id"""
+    def test_count(self):
+        """ Tests count method file storage """
         storage = FileStorage()
-        storage.save()
-        # create new object
-        state = State()
+        dic = {"name": "Vecindad"}
+        state = State(**dic)
         storage.new(state)
-        state_id = state.to_dict()['id']
-        self.assertTrue(storage.get(State, state_id) is state)
+        dic = {"name": "Mexico"}
+        city = City(**dic)
+        storage.new(city)
+        storage.save()
+        c = storage.count()
+        self.assertEqual(len(storage.all()), c)
